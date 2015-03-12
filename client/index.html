@@ -1,0 +1,170 @@
+<html>
+<head>
+<script src="http://fb.me/react-0.13.0.js"></script>
+<script src="http://fb.me/JSXTransformer-0.13.0.js"></script>
+</head>
+
+<body>
+
+<script src="http://fb.me/react-0.13.0.min.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.3.4.js"></script>
+
+ <div id="example"></div>
+    <script type="text/jsx">
+    var Servo1 = React.createClass({
+  render: function() {
+    return (
+      <div className="commentBox">
+		<h3>Height</h3>        
+        <button onClick={this.up}>Up</button>
+        <button onClick={this.down}>Down</button>
+      </div>
+    );
+  },
+  up : function(){
+  	socket.emit('laserUp', {});
+
+  },
+  down: function(){
+  	socket.emit('laserDown', {});
+
+  }
+});
+        var Servo2 = React.createClass({
+  render: function() {
+    return (
+      <div className="commentBox">
+		<h3>Direction</h3>        
+        <button onClick={this.left}>Left</button>
+        <button onClick={this.right}>Right</button>
+      </div>
+    );
+  },
+  left : function(){
+  	socket.emit('laserLeft', {});
+
+  },
+  right: function(){
+  	socket.emit('laserRight', {});
+
+  }
+});
+
+      var Laser = React.createClass({
+  render: function() {
+    return (
+      <div className="commentBox">
+		<h3>Laser control</h3>        
+        <button onClick={this.on}>On</button>
+        <button onClick={this.off}>Off</button>
+      </div>
+    );
+  },
+  on : function(){
+  	socket.emit('laserOn', {});
+
+  },
+  off: function(){
+  	socket.emit('laserOff',{});
+
+  }
+});
+
+
+      var All = React.createClass({
+  render: function() {
+    return (
+      <div>
+      <Servo1/>
+      <Servo2/>
+		<Laser/>
+      </div>
+    );
+  }
+});
+
+React.render(
+  <All/>,
+    document.body
+);
+    </script>
+
+
+<script>
+  var socket = io('http://localhost:9582');
+  socket.on('news', function (data) {
+    console.log(data);
+   
+  });
+
+   socket.emit('laser', { laser: 'stop()' });
+
+
+   document.onkeydown = checkKey;
+
+function checkKey(e) {
+
+    e = e || window.event;
+
+    if (e.keyCode == '38') {
+        // up arrow
+        socket.emit('laserUp', {});
+    }
+    else if (e.keyCode == '40') {
+        // down arrow
+        socket.emit('laserDown', {});
+    }
+    else if (e.keyCode == '37') {
+       // left arrow
+       socket.emit('laserRight', {});
+      
+    }
+    else if (e.keyCode == '39') {
+       // right arrow
+        socket.emit('laserLeft', {});
+    }
+
+}
+
+
+(function() {
+    document.onmousemove = handleMouseMove;
+    function handleMouseMove(event) {
+        var dot, eventDoc, doc, body, pageX, pageY;
+
+        event = event || window.event; // IE-ism
+
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        // (This is to support old IE)
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+              (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+              (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+              (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
+              (doc && doc.clientTop  || body && body.clientTop  || 0 );
+        }
+
+        var positionx = 180- (event.pageX/window.innerWidth)*180;
+       	var positiony = (event.pageY/window.innerHeight)*180;
+       	console.log(positiony + " " + positionx);
+        socket.emit('laserY', {y:positiony});
+        socket.emit('laserX', {x:positionx});
+
+        // Use event.pageX / event.pageY here
+    }
+})();
+
+</script>
+
+
+
+</body>
+
+</html>
+
